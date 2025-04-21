@@ -174,3 +174,50 @@ def print_summary(network):
     print(generation_gwh)
 
     print("=" * 40)
+
+
+
+def plot_interannual_wind_capacity(df_capacities_yearly):
+    """
+    Plot the interannual variation of wind capacity (onshore and offshore) over the years.
+    """
+    # Check if both onshore and offshore wind data are available
+    required_techs = ['onwind', 'offwind']
+    if all(tech in df_capacities_yearly.index for tech in required_techs):
+        df_wind_plot = df_capacities_yearly.loc[required_techs].T
+    # Ensure the index is numeric (years) for plotting if it isn't already
+        df_wind_plot.index = pd.to_numeric(df_wind_plot.index)
+
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Plot onshore wind
+        ax.plot(df_wind_plot.index,           # x-values (years)
+                df_wind_plot['onwind'],        # y-values (capacity)
+                marker='o',                    # Use circles as markers (dots)
+                linestyle='-',                 # Connect markers with a solid line
+                label='Onshore Wind',
+                color=color_map.get('onwind', 'blue')) # Get color from map or default
+
+        # Plot offshore wind
+        ax.plot(df_wind_plot.index,           # x-values (years)
+                df_wind_plot['offwind'],       # y-values (capacity)
+                marker='s',                    # Use squares as markers (optional, 'o' is fine too)
+                linestyle='--',                # Connect markers with a dashed line (optional)
+                label='Offshore Wind',
+                color=color_map.get('offwind', 'cyan')) # Get color from map or default
+
+        # --- Formatting ---
+        ax.set_title('Optimal Wind Capacity Variation by Weather Year')
+        ax.set_xlabel('Weather Year')
+        ax.set_ylabel('Installed Capacity (GW)')
+
+        # Ensure all years are shown as ticks on the x-axis
+        ax.set_xticks(weather_years)
+        ax.tick_params(axis='x', rotation=0) # Keep year labels horizontal
+
+        ax.legend() # Show the legend
+        ax.grid(True, linestyle='--', alpha=0.6) # Add a grid for readability
+        plt.tight_layout() # Adjust plot to prevent labels overlapping
+        plt.show()
+
