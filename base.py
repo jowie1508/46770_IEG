@@ -15,7 +15,7 @@ def data_file(filename):
     return os.path.join(project_root, "data", filename)
 
 
-def build_network(solve=True, year =2015):
+def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU': (51.15, 10.45)}):
     # Annuity Function
     def annuity(r, n):
         return r / (1 - 1 / (1 + r)**n) if r > 0 else 1 / n
@@ -28,15 +28,18 @@ def build_network(solve=True, year =2015):
     if len(snapshots) == 8784:
         # Create a mask to exclude February 29
         snapshots = snapshots[~((snapshots.month == 2) & (snapshots.day == 29))]
-    # 3. Select country
-    country = "DEU"  # Germany
+    
     network = pypsa.Network()
     network.set_snapshots(snapshots)
 
+    # 3. Select country and Add bus
+    country = "DEU"  # Germany
     network.add("Bus",
-        f"{country}_elec")
-
-
+        f"{country}_elec",
+        y = coordinates[country][0],
+        x = coordinates[country][1],
+        carrier="AC")
+    
 
     # 5. Load demand time series
 
@@ -255,6 +258,65 @@ def build_network(solve=True, year =2015):
                 marginal_cost = costs.at["solar", "marginal_cost"],
                 p_max_pu = CF_solar.values,
                 overwrite=True)
+    
+
+    if len(countries) > 1:
+        for country in countries[1:]:
+            # add demand 
+            network.add("Bus",
+                        f"{country}_elec",
+                        y = coordinates[country][0],
+                        x = coordinates[country][1],
+                        carrier="AC")
+            network.add("Load", 
+                        f"{country}_load",
+                        bus=f"{country}_elec",
+                        p_set=df_elec[country].values,
+                        carrier = "AC")
+            network.add(
+                "Generator",
+                f"{country} OCGT",
+                bus=f"{country}_elec",
+                carrier="OCGT",
+                capital_cost=costs.at["OCGT", "capital_cost"],
+                marginal_cost=costs.at["OCGT", "marginal_cost"],
+                efficiency=costs.at["OCGT", "efficiency"],
+                p_nom_extendable=True,
+            )   
+            CF_wind = df_onshorewind[country][[hour.strftime("%Y-%m-%dT%H:%M:%SZ") for hour in network.snapshots]]
+            network.add("Generator",
+                f"{country}_onwind",
+                bus=f"{country}_elec",
+                carrier="onwind",
+                capital_cost=costs.at["onwind", "capital_cost"],
+                marginal_cost=costs.at["onwind", "marginal_cost"],
+                p_max_pu=CF_wind.values,
+                efficiency=costs.at["onwind", "efficiency"],
+                p_nom_extendable=True,
+            )
+            CF_solar = df_solar[country][[hour.strftime("%Y-%m-%dT%H:%M:%SZ") for hour in network.snapshots]]
+            network.add("Generator",
+                f"{country}_solar",
+                bus=f"{country}_elec",
+                carrier="solar",
+                capital_cost=costs.at["solar", "capital_cost"],
+                marginal_cost=costs.at["solar", "marginal_cost"],
+                p_max_pu=CF_solar.values,
+                efficiency=costs.at["solar", "efficiency"],
+                p_nom_extendable=True,
+            )
+            network.add(
+                "Line",
+                f"DEU-{country}",
+                bus0="DEU_elec",
+                bus1=f"{country}_elec",
+                s_nom = 1000,
+                x = 1,
+                r = 1,
+            )
+
+
+
     if solve:
         network.optimize(solver_name="highs")
 
