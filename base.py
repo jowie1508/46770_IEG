@@ -14,8 +14,9 @@ sys.path.append(project_root)  # Add project root to Python's search path
 def data_file(filename):
     return os.path.join(project_root, "data", filename)
 
-
 def build_network(solve=True):
+    global global_costs
+    
     # Annuity Function
     def annuity(r, n):
         return r / (1 - 1 / (1 + r)**n) if r > 0 else 1 / n
@@ -77,7 +78,7 @@ def build_network(solve=True):
         "coal",
         "lignite",
         "biomass CHP",
-        #"battery storage",
+        "battery storage",
     ]
 
     # 8. Add hydro inflow data
@@ -142,8 +143,9 @@ def build_network(solve=True):
         "lignite",
         "biomass CHP",
         "battery storage",
+        "battery inverter"
     ])]
-
+    global_costs = costs
     # 10. Adding carriers
     network.add(
         "Carrier",
@@ -257,6 +259,9 @@ def build_network(solve=True):
         network.optimize(solver_name="highs")
 
     return network
+
+def get_costs():
+    return global_costs.copy()
 
 # This ensures the script doesn't run when imported
 if __name__ == "__main__":

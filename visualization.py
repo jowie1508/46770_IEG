@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 # Color map for consistent plotting
 color_map = {
@@ -165,12 +166,14 @@ def print_summary(network):
     print(f"System Cost: {round(network.objective / 1e9, 2)} billion euros")
     print("=" * 40)
 
-    print("\nOptimal Generator Capacities (GW):")
-    capacities_gw = network.generators.p_nom_opt.div(1e3)
-    print(capacities_gw)
+    print("\nOptimal Generator and Storage Capacities (GW):")
+    gen_caps = network.generators.p_nom_opt.div(1e3)
+    storage_caps = network.storage_units.p_nom_opt.div(1e3)
+    print(pd.concat([gen_caps, storage_caps]))
 
     print("\nOptimal Annual Energy Generation (GWh):")
-    generation_gwh = network.generators_t.p.sum().div(1e6)
-    print(generation_gwh)
+    gen_energy = network.generators_t.p.sum().div(1e6)
+    storage_energy = network.storage_units_t.p.sum().div(1e6)
+    print(pd.concat([gen_energy, storage_energy]))
 
     print("=" * 40)
