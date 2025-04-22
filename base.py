@@ -14,7 +14,7 @@ sys.path.append(project_root)  # Add project root to Python's search path
 def data_file(filename):
     return os.path.join(project_root, "data", filename)
 
-def build_network(solve=True):
+def build_network(solve=True, year =2015):
     global global_costs
     
     # Annuity Function
@@ -23,15 +23,16 @@ def build_network(solve=True):
 
     # Base Model
     # 1. Create the network
-    network = pypsa.Network()
-
+    
+    snapshots = pd.date_range(f"{year}-01-01", f"{year}-12-31 23:00", freq="H")
     # 2. Set the modeling year
-    year = 2015
-    network.set_snapshots(pd.date_range(f"{year}-01-01", f"{year}-12-31 23:00", freq="H"))
-
+    if len(snapshots) == 8784:
+        # Create a mask to exclude February 29
+        snapshots = snapshots[~((snapshots.month == 2) & (snapshots.day == 29))]
     # 3. Select country
     country = "DEU"  # Germany
-
+    network = pypsa.Network()
+    network.set_snapshots(snapshots)
 
     network.add("Bus",
         f"{country}_elec")
@@ -98,6 +99,7 @@ def build_network(solve=True):
     p_nom_ror = inflow_ror_hourly.max()
     p_max_pu_ror = inflow_ror_hourly / p_nom_ror
     # adapt to snapshot format
+
     p_max_pu_ror= p_max_pu_ror[:8760]
     p_max_pu_ror.index = network.snapshots
     p_max_pu_ror.head()
