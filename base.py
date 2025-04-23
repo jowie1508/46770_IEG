@@ -127,6 +127,10 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
     }
     costs = costs.value.unstack().fillna(defaults)
 
+    # gas, coal and lignate based on UBA data 2025 https://doi.org/10.60810/openumwelt-7844
+    costs.at["gas", "CO2 intensity"] = 0.392
+    costs.at["lignite", "CO2 intensity"] = 0.86
+    costs.at["coal", "CO2 intensity"] =1.119
     costs.at["OCGT", "fuel"] = costs.at["gas", "fuel"]
     costs.at["OCGT", "CO2 intensity"] = costs.at["gas", "CO2 intensity"]
     costs.at["CCGT", "fuel"] = costs.at["gas", "fuel"]
@@ -170,6 +174,7 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
                 marginal_cost=costs.at["coal", "marginal_cost"],
                 efficiency=costs.at["coal", "efficiency"],
                 p_min_pu = 0.33,
+                p_nom_max=26000,
                 overwrite=True)
 
     network.add(
@@ -178,7 +183,7 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
             bus=f"{country}_elec",
             p_nom_extendable=True,  
             carrier="lignite",
-            p_nom_max=30000,
+            p_nom_max=21000,
             capital_cost=costs.at["lignite", "capital_cost"],
             marginal_cost=costs.at["lignite", "marginal_cost"],
             efficiency=costs.at["lignite", "efficiency"],
@@ -191,7 +196,7 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
             bus=f"{country}_elec",
             p_nom_extendable=True,
             carrier="biomass CHP",
-            p_nom_max = 5000, # maximum capacity can be limited due to environmental constraints
+            p_nom_max = 10000, # maximum capacity can be limited due to environmental constraints
             capital_cost=costs.at["biomass CHP", "capital_cost"],
             marginal_cost=costs.at["biomass CHP", "marginal_cost"],
             efficiency=costs.at["biomass CHP", "efficiency"],
@@ -205,11 +210,12 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
                 bus=f"{country}_elec",
                 p_nom_extendable=True,
                 carrier="OCGT",
-                # p_nom_max=2000, # limit for now, let's assume this is for peakers
+                p_nom_max=31000, 
                 capital_cost = costs.at["OCGT", "capital_cost"],
                 marginal_cost = costs.at["OCGT", "marginal_cost"],
                 p_min_pu = 0.2,
                 overwrite=True)
+    
 
     # add ror hydro
     network.add(
@@ -221,6 +227,7 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
                 p_max_pu=p_max_pu_ror.loc[network.snapshots],  
                 capital_cost=costs.at["ror", "capital_cost"],       
                 marginal_cost=costs.at["ror", "marginal_cost"],
+                p_nom_max=6000,
                 overwrite=True      
             )
 
@@ -231,7 +238,7 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
                 bus=f"{country}_elec",
                 p_nom_extendable=True,
                 carrier="onwind",
-                #p_nom_max=1000, # maximum capacity can be limited due to environmental constraints
+                p_nom_max=180000, # maximum capacity can be limited due to environmental constraints
                 capital_cost = costs.at["onwind", "capital_cost"],
                 marginal_cost = costs.at["onwind", "marginal_cost"],
                 p_max_pu = CF_onwind.values,
@@ -243,7 +250,7 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
                 bus=f"{country}_elec",
                 p_nom_extendable=True,
                 carrier="offwind",
-                #p_nom_max=1000, # maximum capacity can be limited due to environmental constraints
+                p_nom_max=75000, # maximum capacity can be limited due to environmental constraints
                 capital_cost = costs.at["offwind", "capital_cost"],
                 marginal_cost = costs.at["offwind", "marginal_cost"],
                 p_max_pu = CF_offwind.values,
@@ -255,7 +262,7 @@ def build_network(solve=True, year =2015, countries=["DEU"], coordinates={'DEU':
                 bus=f"{country}_elec",
                 p_nom_extendable=True,
                 carrier="solar",
-                #p_nom_max=1000, # maximum capacity can be limited due to environmental constraints
+                p_nom_max=385000, # maximum capacity can be limited due to environmental constraints
                 capital_cost = costs.at["solar", "capital_cost"],
                 marginal_cost = costs.at["solar", "marginal_cost"],
                 p_max_pu = CF_solar.values,
