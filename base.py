@@ -61,7 +61,7 @@ def load_time_series():
 def load_technology_data(cost_year = 2025, technologies=["onwind", "offwind", "solar", "OCGT", 
                                                          "CCGT", "hydro", "ror", "coal", "lignite", 
                                                          "biomass CHP","battery storage","battery inverter",
-                                                         "HVAC overhead"]):
+                                                         "HVAC overhead", "central air-sourced heat pump"]):
     
     url = f"https://raw.githubusercontent.com/PyPSA/technology-data/master/outputs/costs_{cost_year}.csv"
     costs = pd.read_csv(url, index_col=[0, 1])
