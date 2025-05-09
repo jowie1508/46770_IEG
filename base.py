@@ -63,7 +63,8 @@ def load_technology_data(cost_year = 2025, technologies=["onwind", "offwind", "s
                                                          "biomass CHP","battery storage","battery inverter",
                                                          "HVAC overhead", "central air-sourced heat pump"]):
     
-    url = f"https://raw.githubusercontent.com/PyPSA/technology-data/master/outputs/costs_{cost_year}.csv"
+    #url = f"https://raw.githubusercontent.com/PyPSA/technology-data/master/outputs/costs_{cost_year}.csv"
+    url = f"data/costs_{cost_year}.csv"
     costs = pd.read_csv(url, index_col=[0, 1])
 
     # convert from kW to MW
