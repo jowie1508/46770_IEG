@@ -1,0 +1,15 @@
+jupyter-book
+cookiecutter
+pytest
+black
+numpy
+pandas>=2
+atlite>=0.2.11
+matplotlib
+openpyxl
+pypsa
+networkx
+geopy
+cartopy
+highspy>=1.5.3
+gurobipy
