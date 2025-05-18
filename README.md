@@ -19,7 +19,7 @@ To run the notebooks, follow these steps:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ieg-germany-model.git
+git clone https://github.com/jowie1508/46770_IEG.git
 cd ieg-germany-model
 
 # Create a virtual environment
