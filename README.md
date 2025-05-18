@@ -16,26 +16,25 @@ Full project description: [IEG Course Project Assignment](https://martavp.github
 ## Environment Setup
 
 To run the notebooks, follow these steps:
-	1.	Clone the repository
 
-git clone https://github.com/jowie1508/46770_IEG
-cd 46770_IEG
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/ieg-germany-model.git
+cd ieg-germany-model
 
-
-	2.	Create a virtual environment
-
+# Create a virtual environment
 python -m venv venv
 source venv/bin/activate        # On Windows: venv\Scripts\activate
 
-
-	3.	Install required packages
-
+# Install dependencies
 pip install -r requirements.txt
+```
 
 This environment is based on the one provided for the course. You may also consider using a pre-configured Conda environment if available.
 
-File Structure
+## File Structure
 
+```bash
 ├── Part_A_analysis.ipynb       # Initial setup & basic modeling
 ├── Part_B_analysis.ipynb       # Expanding components
 ├── ...
@@ -44,6 +43,7 @@ File Structure
 ├── visualization.py            # Plotting and result utilities
 ├── requirements.txt            # Python dependencies
 └── README.md                   # This file
+```
 
 ## License and Solver
 
